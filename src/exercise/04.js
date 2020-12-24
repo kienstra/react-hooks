@@ -4,8 +4,24 @@
 import * as React from 'react'
 
 function Board() {
+  const storageKey = 'tictac';
   const getInitialSquares = () => Array(9).fill(null)
-  const [squares, setSquares] = React.useState(getInitialSquares)
+  const [squares, setSquares] = React.useState(() => {
+    const fromStorage = window.localStorage.getItem(storageKey)
+    return fromStorage
+      ? JSON.parse(fromStorage)
+      : getInitialSquares()
+  })
+
+  const previousStorageKey = React.useRef();
+  React.useEffect( () => {
+    if (previousStorageKey.current !== storageKey) {
+      window.localStorage.removeItem(previousStorageKey.current)
+    }
+
+    previousStorageKey.current = storageKey
+    window.localStorage.setItem(storageKey, JSON.stringify(squares))
+  }, [squares, storageKey])
 
   const nextValue = calculateNextValue(squares)
   const winner = calculateWinner(squares)
