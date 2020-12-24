@@ -5,7 +5,7 @@ import * as React from 'react'
 import useLocalStorageState from './useLocalStorageState';
 
 function Greeting({initialName = ''}) {
-  const {name, setName} = useLocalStorageState(initialName)
+  const {name, setName} = useLocalStorageState('name', initialName)
 
   function handleChange(event) {
     setName(event.target.value)
