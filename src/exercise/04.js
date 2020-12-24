@@ -3,14 +3,13 @@
 
 import * as React from 'react'
 
-function Board() {
+function useLocalStorageState(initalStateFallback) {
   const storageKey = 'tictac';
-  const getInitialSquares = () => Array(9).fill(null)
   const [squares, setSquares] = React.useState(() => {
     const fromStorage = window.localStorage.getItem(storageKey)
     return fromStorage
       ? JSON.parse(fromStorage)
-      : getInitialSquares()
+      : initalStateFallback()
   })
 
   const previousStorageKey = React.useRef();
@@ -23,6 +22,12 @@ function Board() {
     window.localStorage.setItem(storageKey, JSON.stringify(squares))
   }, [squares, storageKey])
 
+  return {squares, setSquares};
+}
+
+function Board() {
+  const getInitialSquares = () => Array(9).fill(null)
+  const {squares, setSquares} = useLocalStorageState(getInitialSquares)
   const nextValue = calculateNextValue(squares)
   const winner = calculateWinner(squares)
   const status = calculateStatus(winner, squares, nextValue)
