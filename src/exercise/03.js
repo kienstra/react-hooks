@@ -33,16 +33,13 @@ function App() {
   const [name, setName] = React.useState('')
   const [animal, setAnimal] = React.useState('')
 
-  function handleAnimalChange(event) {
-    setAnimal(event.target.value)
-  }
-
   return (
     <form>
       <Name name={name} onNameChange={event => setName(event.target.value)} />
-      {/* 🐨 pass the animal and onAnimalChange prop here (similar to the Name component above) */}
-      <FavoriteAnimal animal={animal} onAnimalChange={handleAnimalChange}/>
-      {/* 🐨 pass the animal prop here */}
+      <FavoriteAnimal
+        animal={animal}
+        onAnimalChange={event => setAnimal(event.target.value)}
+      />
       <Display name={name} animal={animal} />
     </form>
   )
