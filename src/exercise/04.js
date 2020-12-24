@@ -4,13 +4,12 @@
 import * as React from 'react'
 
 function Board() {
-  // 🐨 squares is the state for this component. Add useState for squares
   const getInitialSquares = () => Array(9).fill(null)
   const [squares, setSquares] = React.useState(getInitialSquares)
 
-  const nextValue = calculateNextValue(squares) // ('X' or 'O')
-  const winner = calculateWinner(squares) // ('X', 'O', or null)
-  const status = calculateStatus(winner, squares, nextValue) // (`Winner: ${winner}`, `Scratch: Cat's game`, or `Next player: ${nextValue}`)
+  const nextValue = calculateNextValue(squares)
+  const winner = calculateWinner(squares)
+  const status = calculateStatus(winner, squares, nextValue)
 
   /** @param int square The index of the square to select */
   function selectSquare(square) {
@@ -71,7 +70,6 @@ function Game() {
   )
 }
 
-// eslint-disable-next-line no-unused-vars
 function calculateStatus(winner, squares, nextValue) {
   return winner
     ? `Winner: ${winner}`
@@ -80,14 +78,12 @@ function calculateStatus(winner, squares, nextValue) {
     : `Next player: ${nextValue}`
 }
 
-// eslint-disable-next-line no-unused-vars
 function calculateNextValue(squares) {
   const xSquaresCount = squares.filter(r => r === 'X').length
   const oSquaresCount = squares.filter(r => r === 'O').length
   return oSquaresCount === xSquaresCount ? 'X' : 'O'
 }
 
-// eslint-disable-next-line no-unused-vars
 function calculateWinner(squares) {
   const lines = [
     [0, 1, 2],
