@@ -3,7 +3,7 @@
 
 import * as React from 'react'
 import {fetchPokemon, PokemonDataView, PokemonForm, PokemonInfoFallback} from '../pokemon'
-import ErrorBoundary from '../error-boundary';
+import {ErrorBoundary} from 'react-error-boundary'
 
 function PokemonInfo({pokemonName}) {
   const [state, setState] = React.useState({status: 'idle'})
@@ -25,7 +25,7 @@ function PokemonInfo({pokemonName}) {
           setState({error, status: 'rejected'})
         }
       )
-  }, [pokemonName] )
+  }, [pokemonName, setState] )
 
   if (! pokemonName) {
     return 'Submit a pokemon'
@@ -44,6 +44,16 @@ function PokemonInfo({pokemonName}) {
     : <PokemonInfoFallback name={pokemonName} />
 }
 
+function ErrorFallback({error, resetErrorBoundary}) {
+  return (
+    <div role="alert">
+      <p>Something went wrong:</p>
+      <pre>{error.message}</pre>
+      <button onClick={resetErrorBoundary}>Try again</button>
+    </div>
+  )
+}
+
 function App() {
   const [pokemonName, setPokemonName] = React.useState('')
 
@@ -51,9 +61,17 @@ function App() {
     setPokemonName(newPokemonName)
   }
 
+  function handleReset() {
+    setPokemonName('')
+  }
+
   return (
       <div className="pokemon-info-app">
-        <ErrorBoundary key="pokemonName">
+        <ErrorBoundary key="pokemonName"
+          FallbackComponent={ErrorFallback}
+          onReset={handleReset}
+          resetKeys={[pokemonName]}
+        >
           <PokemonForm pokemonName={pokemonName} onSubmit={handleSubmit} />
           <hr />
           <div className="pokemon-info">
