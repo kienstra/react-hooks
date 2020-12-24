@@ -3,6 +3,7 @@
 
 import * as React from 'react'
 import {fetchPokemon, PokemonDataView, PokemonForm, PokemonInfoFallback} from '../pokemon'
+import ErrorBoundary from '../error-boundary';
 
 function PokemonInfo({pokemonName}) {
   const [state, setState] = React.useState({status: 'idle'})
@@ -31,11 +32,7 @@ function PokemonInfo({pokemonName}) {
   }
 
   if ('rejected' === state.status && state.error ) {
-    return (
-      <div role="alert">
-        There was an error: <pre style={{whiteSpace: 'normal'}}>{state.error.message}</pre>
-      </div>
-    );
+    throw new Error( state.error.message )
   }
 
   if ('pending' === state.status) {
@@ -55,12 +52,14 @@ function App() {
   }
 
   return (
-    <div className="pokemon-info-app">
-      <PokemonForm pokemonName={pokemonName} onSubmit={handleSubmit} />
-      <hr />
-      <div className="pokemon-info">
-        <PokemonInfo pokemonName={pokemonName} />
-      </div>
+      <div className="pokemon-info-app">
+        <ErrorBoundary key="pokemonName">
+          <PokemonForm pokemonName={pokemonName} onSubmit={handleSubmit} />
+          <hr />
+          <div className="pokemon-info">
+            <PokemonInfo pokemonName={pokemonName} />
+          </div>
+        </ErrorBoundary>
     </div>
   )
 }
