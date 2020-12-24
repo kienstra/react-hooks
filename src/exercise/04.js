@@ -13,7 +13,7 @@ function Board() {
 
   /** @param int square The index of the square to select */
   function selectSquare(square) {
-    if (squares[square]) {
+    if (winner || squares[square]) {
       return
     }
 
