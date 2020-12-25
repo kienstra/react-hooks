@@ -3,13 +3,16 @@
 
 import * as React from 'react'
 
-function useLocalStorageState(initalStateFallback) {
+function useLocalStorageState(initialBoard) {
   const storageKey = 'tictac';
-  const [squares, setSquares] = React.useState(() => {
+  const [state, setState] = React.useState(() => {
     const fromStorage = window.localStorage.getItem(storageKey)
     return fromStorage
       ? JSON.parse(fromStorage)
-      : initalStateFallback()
+      : {
+          positions: [initialBoard],
+          currentPosition: 0,
+      };
   })
 
   const previousStorageKey = React.useRef();
@@ -19,33 +22,26 @@ function useLocalStorageState(initalStateFallback) {
     }
 
     previousStorageKey.current = storageKey
-    window.localStorage.setItem(storageKey, JSON.stringify(squares))
-  }, [squares, storageKey])
+    window.localStorage.setItem(storageKey, JSON.stringify(state))
+  }, [state, storageKey])
 
-  return {squares, setSquares};
+  return {state, setState};
 }
 
-function Board() {
-  const getInitialSquares = () => Array(9).fill(null)
-  const {squares, setSquares} = useLocalStorageState(getInitialSquares)
+function Board({squares, addNewSquares}) {
   const nextValue = calculateNextValue(squares)
   const winner = calculateWinner(squares)
-  const status = calculateStatus(winner, squares, nextValue)
 
   /** @param int square The index of the square to select */
-  function selectSquare(square) {
-    if (winner || squares[square]) {
+  function selectSquare(squareIndex) {
+    if (winner || squares[squareIndex]) {
       return
     }
 
     // 🦉 It's typically a bad idea to mutate or directly change state in React.
     const newSquares = [...squares]
-    newSquares[square] = nextValue;
-    setSquares(newSquares)
-  }
-
-  function restart() {
-    setSquares(getInitialSquares())
+    newSquares[squareIndex] = nextValue;
+    addNewSquares(newSquares)
   }
 
   function renderSquare(i) {
@@ -58,7 +54,6 @@ function Board() {
 
   return (
     <div>
-      <div className="status">{ status }</div>
       <div className="board-row">
         {renderSquare(0)}
         {renderSquare(1)}
@@ -74,18 +69,74 @@ function Board() {
         {renderSquare(7)}
         {renderSquare(8)}
       </div>
-      <button className="restart" onClick={restart}>
-        restart
-      </button>
     </div>
   )
 }
 
 function Game() {
+  const getInitialSquares = () => Array(9).fill(null)
+  const {state, setState} = useLocalStorageState(getInitialSquares())
+
+  const addNewSquares = newSquares => {
+    const newCurrentPosition = state.currentPosition + 1
+    const newPositions = [ ...state.positions ].filter( (position, index) => {
+      return index < newCurrentPosition;
+    })
+
+    setState({
+      positions: [ ...newPositions, newSquares ],
+      currentPosition: newCurrentPosition,
+    })
+  };
+
+  const reset = initialSquares => {
+    setState({
+      positions: [ initialSquares ],
+      currentPosition: 0,
+    })
+  };
+
+  const squares = state.positions[state.currentPosition];
+  const nextValue = calculateNextValue(squares)
+  const winner = calculateWinner(squares)
+  const status = calculateStatus(winner, squares, nextValue)
+  const handleRestart = () => reset(getInitialSquares());
+
   return (
     <div className="game">
       <div className="game-board">
-        <Board />
+        <Board squares={squares} addNewSquares={addNewSquares} />
+        <button className="restart" onClick={handleRestart}>
+          restart
+        </button>
+      </div>
+      <div className="game-info">
+        <div>{status}</div>
+        <ol>
+          {state.positions.map( ( position, index ) => {
+            const isCurrent = index === state.currentPosition;
+            return (
+              <li key={`tic-tac-position-${ index }`}>
+                <button
+                  disabled={isCurrent}
+                  onClick={() => setState({
+                    ...state,
+                    currentPosition: index,
+                  })}
+                >
+                  { 0 === index
+                    ? 'Go to game start'
+                    : `Go to move #${index}`
+                  }
+                  { isCurrent
+                    ? ' (current)'
+                    : null
+                  }
+                </button>
+              </li>
+            )
+          })}
+        </ol>
       </div>
     </div>
   )
