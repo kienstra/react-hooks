@@ -79,13 +79,11 @@ function Game() {
 
   const addNewSquares = newSquares => {
     const newCurrentPosition = state.currentPosition + 1
-    const newPositions = [ ...state.positions ].filter( (position, index) => {
-      return index < newCurrentPosition;
-    })
+    const newPositions = state.positions.slice(0, newCurrentPosition)
 
     setState({
       positions: [ ...newPositions, newSquares ],
-      currentPosition: newCurrentPosition,
+      currentPosition: newPositions.length,
     })
   };
 
@@ -116,7 +114,7 @@ function Game() {
           {state.positions.map( ( position, index ) => {
             const isCurrent = index === state.currentPosition;
             return (
-              <li key={`tic-tac-position-${ index }`}>
+              <li key={index}>
                 <button
                   disabled={isCurrent}
                   onClick={() => setState({
